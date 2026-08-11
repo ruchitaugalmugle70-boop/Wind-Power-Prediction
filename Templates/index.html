@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Wind Power Intelligence</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+            background:
+                radial-gradient(circle at 20% 20%, #164e63 0%, transparent 35%),
+                radial-gradient(circle at 80% 80%, #14532d 0%, transparent 35%),
+                #020617;
+            overflow-x: hidden;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            border-radius: 30px;
+            color: #86efac;
+            background: rgba(34, 197, 94, 0.08);
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 42px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            margin-top: 12px;
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .dashboard {
+            max-width: 1150px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .panel {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        /* ---------------- TURBINE ---------------- */
+
+        .turbine-panel {
+            min-height: 620px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wind-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .wind-lines span {
+            position: absolute;
+            width: 130px;
+            height: 2px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(125, 211, 252, 0.5),
+                transparent
+            );
+            animation: wind 4s linear infinite;
+        }
+
+        .wind-lines span:nth-child(1) {
+            top: 25%;
+            left: -150px;
+        }
+
+        .wind-lines span:nth-child(2) {
+            top: 40%;
+            left: -300px;
+            animation-delay: 1s;
+        }
+
+        .wind-lines span:nth-child(3) {
+            top: 55%;
+            left: -200px;
+            animation-delay: 2s;
+        }
+
+        .wind-lines span:nth-child(4) {
+            top: 70%;
+            left: -350px;
+            animation-delay: 3s;
+        }
+
+        @keyframes wind {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(900px);
+            }
+        }
+
+        .turbine {
+            width: 300px;
+            height: 430px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tower {
+            position: absolute;
+            bottom: 30px;
+            left: 135px;
+            width: 30px;
+            height: 300px;
+            background: linear-gradient(
+                90deg,
+                #cbd5e1,
+                #64748b,
+                #e2e8f0
+            );
+            clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%);
+        }
+
+        .base {
+            position: absolute;
+            bottom: 20px;
+            left: 105px;
+            width: 90px;
+            height: 18px;
+            border-radius: 50%;
+            background: #334155;
+        }
+
+        .hub {
+            position: absolute;
+            top: 92px;
+            left: 123px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at 35% 35%,
+                #f8fafc,
+                #64748b 60%,
+                #1e293b
+            );
+            z-index: 4;
+            box-shadow: 0 0 30px rgba(125, 211, 252, 0.3);
+        }
+
+        .blades {
+            position: absolute;
+            top: 127px;
+            left: 157px;
+            width: 8px;
+            height: 8px;
+            animation: rotate 4s linear infinite;
+            transform-origin: center;
+            z-index: 3;
+        }
+
+        .blade {
+            position: absolute;
+            width: 18px;
+            height: 145px;
+            left: -5px;
+            bottom: 0;
+            border-radius: 100% 100% 20% 20%;
+            background: linear-gradient(
+                90deg,
+                #f8fafc,
+                #94a3b8
+            );
+            transform-origin: 50% 100%;
+        }
+
+        .blade:nth-child(1) {
+            transform: rotate(0deg);
+        }
+
+        .blade:nth-child(2) {
+            transform: rotate(120deg);
+        }
+
+        .blade:nth-child(3) {
+            transform: rotate(240deg);
+        }
+
+        @keyframes rotate {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .turbine-title {
+            z-index: 5;
+            margin-top: 15px;
+            font-size: 20px;
+            color: #cbd5e1;
+        }
+
+        .status {
+            z-index: 5;
+            margin-top: 8px;
+            color: #4ade80;
+            font-size: 13px;
+        }
+
+        /* ---------------- FORM ---------------- */
+
+        .form-title {
+            margin-top: 0;
+            font-size: 25px;
+        }
+
+        .form-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .field {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #cbd5e1;
+            font-size: 13px;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            outline: none;
+            background: rgba(2, 6, 23, 0.7);
+            color: white;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #4ade80;
+            box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.12);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                #16a34a,
+                #22c55e
+            );
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.25);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* ---------------- RESULT ---------------- */
+
+        .result {
+            margin-top: 25px;
+            padding: 22px;
+            border-radius: 16px;
+            text-align: center;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .result-label {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .result-value {
+            margin-top: 7px;
+            font-size: 34px;
+            font-weight: bold;
+            color: #86efac;
+        }
+
+        .model-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid #1e293b;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .model-info strong {
+            color: #e2e8f0;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+            color: #86efac;
+        }
+
+        @media (max-width: 850px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .turbine-panel {
+                min-height: 500px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="header">
+
+        <div class="badge">
+            AI POWER PREDICTION SYSTEM
+        </div>
+
+        <h1>Wind Power Intelligence</h1>
+
+        <div class="subtitle">
+            Predict wind turbine power generation using Machine Learning
+        </div>
+
+    </div>
+
+    <div class="dashboard">
+
+        <!-- TURBINE VISUAL -->
+
+        <div class="panel turbine-panel">
+
+            <div class="wind-lines">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="turbine">
+
+                <div class="tower"></div>
+
+                <div class="base"></div>
+
+                <div class="blades">
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                    <div class="blade"></div>
+                </div>
+
+                <div class="hub"></div>
+
+            </div>
+
+            <div class="turbine-title">
+                Wind Turbine
+            </div>
+
+            <div class="status">
+                ● SYSTEM READY
+            </div>
+
+        </div>
+
+
+        <!-- PREDICTION FORM -->
+
+        <div class="panel">
+
+            <h2 class="form-title">
+                Generate Prediction
+            </h2>
+
+            <p class="form-subtitle">
+                Enter turbine and environmental conditions.
+            </p>
+
+
+            <div class="field">
+                <label>Wind Speed (m/s)</label>
+                <input id="wind_speed"
+                       type="number"
+                       step="any"
+                       placeholder="e.g. 10">
+            </div>
+
+
+            <div class="field">
+                <label>Theoretical Power (KWh)</label>
+                <input id="theoretical_power"
+                       type="number"
+                       step="any"
+                       placeholder="e.g. 3000">
+            </div>
+
+
+            <div class="field">
+                <label>Wind Direction (°)</label>
+                <input id="wind_direction"
+                       type="number"
+                       step="any"
+                       placeholder="e.g. 180">
+            </div>
+
+
+            <div class="field">
+                <label>Hour (0–23)</label>
+                <input id="hour"
+                       type="number"
+                       min="0"
+                       max="23"
+                       placeholder="e.g. 12">
+            </div>
+
+
+            <div class="field">
+                <label>Day (1–31)</label>
+                <input id="day"
+                       type="number"
+                       min="1"
+                       max="31"
+                       placeholder="e.g. 10">
+            </div>
+
+
+            <div class="field">
+                <label>Month (1–12)</label>
+                <input id="month"
+                       type="number"
+                       min="1"
+                       max="12"
+                       placeholder="e.g. 8">
+            </div>
+
+
+            <div class="field">
+                <label>Day of Week (0 = Monday)</label>
+                <input id="day_of_week"
+                       type="number"
+                       min="0"
+                       max="6"
+                       placeholder="e.g. 0">
+            </div>
+
+
+            <button id="predictBtn">
+                ⚡ Predict Power
+            </button>
+
+
+            <div class="loading" id="loading">
+                Analyzing turbine conditions...
+            </div>
+
+
+            <div class="result">
+
+                <div class="result-label">
+                    PREDICTED POWER OUTPUT
+                </div>
+
+                <div class="result-value" id="result">
+                    -- kW
+                </div>
+
+            </div>
+
+
+            <div class="model-info">
+
+                <span>
+                    Model:
+                    <strong>Random Forest</strong>
+                </span>
+
+                <span>
+                    R²:
+                    <strong>97.44%</strong>
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const predictBtn = document.getElementById("predictBtn");
+
+    predictBtn.addEventListener("click", async () => {
+
+        const data = {
+            wind_speed:
+                parseFloat(document.getElementById("wind_speed").value),
+
+            theoretical_power:
+                parseFloat(document.getElementById("theoretical_power").value),
+
+            wind_direction:
+                parseFloat(document.getElementById("wind_direction").value),
+
+            hour:
+                parseInt(document.getElementById("hour").value),
+
+            day:
+                parseInt(document.getElementById("day").value),
+
+            month:
+                parseInt(document.getElementById("month").value),
+
+            day_of_week:
+                parseInt(document.getElementById("day_of_week").value)
+        };
+
+
+        const values = Object.values(data);
+
+        if (values.some(value => Number.isNaN(value))) {
+
+            document.getElementById("result").textContent =
+                "Enter all values";
+
+            return;
+        }
+
+
+        document.getElementById("loading").style.display = "block";
+
+        document.getElementById("result").textContent = "-- kW";
+
+
+        try {
+
+            const response = await fetch("/predict", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+
+            });
+
+
+            const result = await response.json();
+
+
+            document.getElementById("result").textContent =
+                result.predicted_power.toFixed(2) + " kW";
+
+
+        } catch (error) {
+
+            document.getElementById("result").textContent =
+                "Prediction Error";
+
+        }
+
+
+        document.getElementById("loading").style.display = "none";
+
+    });
+
+</script>
+
+</body>
+</html>
